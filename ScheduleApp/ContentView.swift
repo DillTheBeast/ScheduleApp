@@ -9,8 +9,13 @@ import SwiftUI
 import Foundation
 import Combine
 
+extension Color {
+    static let hotPink = Color(red: 255.0/255.0, green: 105.0/255.0, blue: 180.0/255.0)
+}
 
 struct ContentView: View {
+    @State private var editColorsScene: Bool = false
+    
     @State private var found = 0
     @State private var day = "";
     @State private var csvData: [[String]] = []
@@ -31,6 +36,15 @@ struct ContentView: View {
     @AppStorage("Orange") var OrangeData: Data = Data()
     @AppStorage("Purple") var PurpleData: Data = Data()
     
+    @State private var savedRed: String = ""
+    @State private var savedBlue: String = ""
+    @State private var savedGreen: String = ""
+    @State private var savedOrange: String = ""
+    @State private var savedYellow: String = ""
+    @State private var savedPurple: String = ""
+    @State private var savedPink: String = ""
+    @State private var savedTan: String = ""
+    
     let dayA: [String] = ["Purple", "Pink", "Red", "Yellow", "Orange"]
     let dayB: [String] = ["Green", "Blue", "Tan", "Purple", "Pink"]
     let dayC: [String] = ["Yellow", "Red", "Orange", "Green", "Blue"]
@@ -50,39 +64,83 @@ struct ContentView: View {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: SelectedDate)
     }
+    var displayDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE MMMM dd"
+        return formatter.string(from: SelectedDate)
+    }
     
+    //Getting all of the saved color data from last opening of app
+    init() {
+        if let savedRed = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Red") ?? Data()) {
+            RedData = UserDefaults.standard.data(forKey: "Red") ?? Data()
+        }
+        if let savedBlue = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Blue") ?? Data()) {
+            BlueData = UserDefaults.standard.data(forKey: "Blue") ?? Data()
+        }
+        if let savedGreen = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Green") ?? Data()) {
+            GreenData = UserDefaults.standard.data(forKey: "Green") ?? Data()
+        }
+        if let savedOrange = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Orange") ?? Data()) {
+            OrangeData = UserDefaults.standard.data(forKey: "Orange") ?? Data()
+        }
+        if let savedTan = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Tan") ?? Data()) {
+            TanData = UserDefaults.standard.data(forKey: "Tan") ?? Data()
+        }
+        if let savedPurple = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Purple") ?? Data()) {
+            PurpleData = UserDefaults.standard.data(forKey: "Purple") ?? Data()
+        }
+        if let savedPink = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Pink") ?? Data()) {
+            PinkData = UserDefaults.standard.data(forKey: "Pink") ?? Data()
+        }
+        if let savedYellow = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Yellow") ?? Data()) {
+            YellowData = UserDefaults.standard.data(forKey: "Yellow") ?? Data()
+        }
+
+    }
+
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack {
-                Text(formattedDate)
+                Text(displayDate)
                     .foregroundColor(.white)
-                Text("\(found)")
-                    .foregroundColor(.white)
+                    .font(.system(size: 30))
                 Text("\(day)")
+                    .font(.system(size: 30))
                     .foregroundColor(.white)
                 // Create a box with the text and background color
                 Text(colorName1 + "\n8:05 - 9:10")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                     .padding()
                     .background(colorFromName(name: colorName1))
                     .cornerRadius(8)
                     .foregroundColor(.white)
-                Text(colorName2)
+                Text(colorName2 + "\n9:15 - 10:20")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                     .padding()
                     .background(colorFromName(name: colorName2))
                     .cornerRadius(8)
                     .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName3)
+                Text(colorName3 + "\n10:50 - 11:55")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                     .padding()
                     .background(colorFromName(name: colorName3))
                     .cornerRadius(8)
                     .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName4)
+                Text(colorName4 + "\n12:50 - 2:10")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                     .padding()
                     .background(colorFromName(name: colorName4))
                     .cornerRadius(8)
                     .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName5)
+                Text(colorName5 + "\n2:15 - 3:20")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
                     .padding()
                     .background(colorFromName(name: colorName5))
                     .cornerRadius(8)
@@ -91,6 +149,7 @@ struct ContentView: View {
                 Button("Go to Next Day") {
                     if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
                         SelectedDate = newDate
+                        Schedule()
                     }
                 }
                 .padding()
@@ -101,18 +160,19 @@ struct ContentView: View {
                 Button("Go to Previous Day") {
                     if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
                         SelectedDate = newDate
+                        Schedule()
                     }
                 }
                 .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(8)
-//                Button("Edit Colors") {
-////                    if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
-////                        SelectedDate = newDate
-////                    }
-//                    print("Test")
-//                }
+                Button("Edit Colors") {
+                    if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
+                        SelectedDate = newDate
+                   }
+                    print("Test")
+                }
                 .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
@@ -144,6 +204,7 @@ struct ContentView: View {
     }
     func Schedule() {
         for (index, row) in csvData.enumerated() {
+            print(formattedDate)
             if let firstColumnValue = row.first, firstColumnValue == formattedDate {
                 print("Match found in row!")
                 found = index + 1
@@ -208,7 +269,7 @@ struct ContentView: View {
             case "purple":
                 return Color.purple
             case "pink":
-                return Color.pink
+                return Color.hotPink
             case "red":
                 return Color.red
             case "yellow":
@@ -228,6 +289,148 @@ struct ContentView: View {
     }
 
 }
+
+struct editColors: View {
+    @Binding var editColorsScene: Bool
+    @State private var redWord: String = ""
+    @State private var blueWord: String = ""
+    @State private var greenWord: String = ""
+    @State private var orangeWord: String = ""
+    @State private var purpleWord: String = ""
+    @State private var pinkWord: String = ""
+    @State private var yellowWord: String = ""
+    @State private var tanWord: String = ""
+    
+    @State private var filloutPopup = false
+    @State var red: String = ""
+    @State var blue: String = ""
+    @State var green: String = ""
+    @State var orange: String = ""
+    @State var yellow: String = ""
+    @State var purple: String = ""
+    @State var pink: String = ""
+    @State var tan: String = ""
+    
+    var body: some View {
+        VStack {
+            Text("Enter a Red Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Red Period", text: $redWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Blue Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Blue Period", text: $blueWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Green Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Green Period", text: $greenWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Orange Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Orange Period", text: $orangeWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Yellow Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Yellow Period", text: $yellowWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Purple Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Purple Period", text: $purpleWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Pink Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Pink Period", text: $pinkWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Text("Enter a Tan Period")
+                .padding()
+                .foregroundColor(.white)
+            TextField("Enter a Tan Period", text: $tanWord)
+                .padding()
+                .border(Color.white, width: 1)
+                .foregroundColor(.white)
+            
+            Button("Save Info") {
+                if redWord.isEmpty || blueWord.isEmpty || greenWord.isEmpty || orangeWord.isEmpty || yellowWord.isEmpty || purpleWord.isEmpty || pinkWord.isEmpty || tanWord.isEmpty {
+                    filloutPopup = true
+                } else {
+                    red = redWord
+                    blue = blueWord
+                    green = greenWord
+                    orange = orangeWord
+                    yellow = yellowWord
+                    purple = purpleWord
+                    pink = pinkWord
+                    tan = tanWord
+                    editColorsScene.toggle()
+                }
+            }
+            .padding()
+            .border(Color.white, width: 1)
+            .foregroundColor(.white)
+            
+            Button("Go Back") {
+                editColorsScene.toggle()
+            }
+            .padding()
+            .background(Color.red)
+            .foregroundColor(.white)
+            .cornerRadius(8)
+        }
+        if filloutPopup {
+            Color.black.opacity(0.4)
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    // Close popup when background is tapped
+                    filloutPopup = false
+                }
+
+            VStack(spacing: 20) {
+                Text("You did not fill out all of the requirements")
+
+                Button("Close") {
+                    filloutPopup = false
+                }
+                .padding()
+                .background(Color.black)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            }
+            .frame(width: 300, height: 200)
+            .background(Color.red)
+            .cornerRadius(20)
+            .shadow(radius: 20)
+        }
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
