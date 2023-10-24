@@ -9,6 +9,7 @@ import SwiftUI
 import Foundation
 import Combine
 
+//Making color for pink in rgb because normal pink is too close to red
 extension Color {
     static let hotPink = Color(red: 255.0/255.0, green: 105.0/255.0, blue: 180.0/255.0)
 }
@@ -19,13 +20,13 @@ struct ContentView: View {
     @State private var found = 0
     @State private var day = "";
     @State private var csvData: [[String]] = []
-    let currentDate = Date()
-    let dateFormatter = DateFormatter()
     @State private var colorName1: String = ""
     @State private var colorName2: String = ""
     @State private var colorName3: String = ""
     @State private var colorName4: String = ""
     @State private var colorName5: String = ""
+    let currentDate = Date()
+    let dateFormatter = DateFormatter()
     
     @AppStorage("Red") var RedData: Data = Data()
     @AppStorage("Blue") var BlueData: Data = Data()
@@ -45,32 +46,84 @@ struct ContentView: View {
     @State private var savedPink: String = ""
     @State private var savedTan: String = ""
     
-    let dayA: [String] = ["Purple", "Pink", "Red", "Yellow", "Orange"]
-    let dayB: [String] = ["Green", "Blue", "Tan", "Purple", "Pink"]
-    let dayC: [String] = ["Yellow", "Red", "Orange", "Green", "Blue"]
-    let dayD: [String] = ["Tan", "Purple", "Pink", "Red", "Yellow"]
-    let dayE: [String] = ["Orange", "Green", "Blue", "Tan", "Purple"]
-    let dayF: [String] = ["Pink", "Red", "Yellow", "Orange", "Green"]
-    let dayG: [String] = ["Blue", "Tan", "Purple", "Pink", "Red"]
-    let dayH: [String] = ["Yellow", "Orange", "Green", "Blue", "Tan"]
+    //Schedule in days using variables of what period you have for each color
+    var dayA: [String] {
+        return [savedPurple, savedPink, savedRed, savedYellow, savedOrange]
+    }
+    var dayB: [String] {
+        return [savedGreen, savedBlue, savedTan, savedPurple, savedPink]
+    }
+    var dayC: [String] {
+        return [savedYellow, savedRed, savedOrange, savedGreen, savedBlue]
+    }
+    var dayD: [String] {
+        return [savedTan, savedPurple, savedPink, savedRed, savedYellow]
+    }
+    var dayE: [String] {
+        return [savedOrange, savedGreen, savedBlue, savedTan, savedPurple]
+    }
+    var dayF: [String] {
+        return [savedPink, savedRed, savedYellow, savedOrange, savedGreen]
+    }
+    var dayG: [String] {
+        return [savedBlue, savedTan, savedPurple, savedPink, savedRed]
+    }
+    var dayH: [String] {
+        return [savedYellow, savedOrange, savedGreen, savedBlue, savedTan]
+    }
     
+    //Schedule in days using Strings with the word of each color
+    var DayA: [String] = ["Purple", "Pink", "Red", "Yellow", "Orange"]
+    var DayB: [String] = ["Green", "Blue", "Tan", "Purple", "Pink"]
+    var DayC: [String] = ["Yellow", "Red", "Orange", "Green", "Blue"]
+    var DayD: [String] = ["Tan", "Purple", "Pink", "Red", "Yellow"]
+    var DayE: [String] = ["Orange", "Green", "Blue", "Tan", "Purple"]
+    var DayF: [String] = ["Pink", "Red", "Yellow", "Orange", "Green"]
+    var DayG: [String] = ["Blue", "Tan", "Purple", "Pink", "Red"]
+    var DayH: [String] = ["Yellow", "Orange", "Green", "Blue", "Tan"]
+    
+    //Getting the date selected
     @State var SelectedDate: Date = {
         let date = Date()
         return Calendar.current.date(byAdding: .day, value: 0, to: date)!
     }()
     
+    //Getting the date to compare to the datasheet
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: SelectedDate)
     }
+    //Geting the date to display nicely
     var displayDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE MMMM dd"
         return formatter.string(from: SelectedDate)
     }
-    
-    //Getting all of the saved color data from last opening of app
+
+    var currentDaySchedule: [String] {
+        switch day {
+        case "dayA":
+            return DayA
+        case "dayB":
+            return DayB
+        case "dayC":
+            return DayC
+        case "dayD":
+            return DayD
+        case "dayE":
+            return DayE
+        case "dayF":
+            return DayF
+        case "dayG":
+            return DayG
+        case "dayH":
+            return DayH
+        default:
+            return [] // Default to an empty list if no match is found
+        }
+    }
+
     init() {
         if let savedRed = try? JSONDecoder().decode([String].self, from: UserDefaults.standard.data(forKey: "Red") ?? Data()) {
             RedData = UserDefaults.standard.data(forKey: "Red") ?? Data()
@@ -103,80 +156,52 @@ struct ContentView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack {
-                Text(displayDate)
-                    .foregroundColor(.white)
-                    .font(.system(size: 30))
-                Text("\(day)")
-                    .font(.system(size: 30))
-                    .foregroundColor(.white)
-                // Create a box with the text and background color
-                Text(colorName1 + "\n8:05 - 9:10")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                    .background(colorFromName(name: colorName1))
-                    .cornerRadius(8)
-                    .foregroundColor(.white)
-                Text(colorName2 + "\n9:15 - 10:20")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                    .background(colorFromName(name: colorName2))
-                    .cornerRadius(8)
-                    .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName3 + "\n10:50 - 11:55")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                    .background(colorFromName(name: colorName3))
-                    .cornerRadius(8)
-                    .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName4 + "\n12:50 - 2:10")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                    .background(colorFromName(name: colorName4))
-                    .cornerRadius(8)
-                    .foregroundColor(.white) // Assuming text will be white for visibility
-                Text(colorName5 + "\n2:15 - 3:20")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                    .background(colorFromName(name: colorName5))
-                    .cornerRadius(8)
-                    .foregroundColor(.white) // Assuming text will be white for visibility
+                if editColorsScene {
+                    //editColors(editColorsScene: $editColorsScene, red: savedRed, blue: savedBlue, green: savedGreen, orange: savedOrange, yellow: savedYellow, purple: savedPurple, pink: savedPink, tan: savedTan, dayA: dayA)
+                    Text("Test")
+                } else {
+                    Text(displayDate)
+                        .foregroundColor(.white)
+                        .font(.system(size: 30))
+                    Text("\(day)")
+                        .font(.system(size: 30))
+                        .foregroundColor(.white)
+                    // Create a box with the text and background color
+                    display()
 
-                Button("Go to Next Day") {
-                    if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
-                        SelectedDate = newDate
-                        Schedule()
+                    Button("Go to Next Day") {
+                        if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
+                            SelectedDate = newDate
+                            Schedule()
+                            display()
+                        }
                     }
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                
-                Button("Go to Previous Day") {
-                    if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
-                        SelectedDate = newDate
-                        Schedule()
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
+                    Button("Go to Previous Day") {
+                        if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
+                            SelectedDate = newDate
+                            Schedule()
+                            display()
+                        }
                     }
+                     
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    Button("Edit Colors") {
+                        editColorsScene = true
+                        print("Test")
+                    }
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
                 }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                Button("Edit Colors") {
-                    if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
-                        SelectedDate = newDate
-                   }
-                    print("Test")
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
             .padding()
             .onAppear {
@@ -186,6 +211,22 @@ struct ContentView: View {
                 Schedule()
             }
         }
+    }
+    func display() -> some View {
+        List(0..<DayA.count, id: \.self) { index in
+            HStack {
+                Spacer() // This spacer will push the content to the center
+                Text(currentDaySchedule[index])
+                    .font(.system(size: 26))
+                    .foregroundColor(Color.white)
+                    .padding(.vertical, 30) // Add vertical padding to fill the space
+                Spacer() // This spacer will keep the content in the center
+            }
+            .background(self.colorFromName(name: DayA[index]))
+            .listRowInsets(EdgeInsets()) // Removes default padding from list row
+            .listRowBackground(self.colorFromName(name: DayA[index])) // Color the entire row
+        }
+        .listStyle(.plain)
     }
     func fetchData() {
         let url = URL(string: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS3-6MgEPFUcHbLfa7q97_I6BI8CJvLZA0FDPxMwKOEFKYZs1GAw_4CRt6oOIWhMEITpOKzYrW2u7Ef/pub?gid=0&single=true&output=csv")!
@@ -213,53 +254,53 @@ struct ContentView: View {
             }
         }
         if day == "dayA" {
-            colorName1 = dayA[0]
-            colorName2 = dayA[1]
-            colorName3 = dayA[2]
-            colorName4 = dayA[3]
-            colorName5 = dayA[4]
+            colorName1 = DayA[0]
+            colorName2 = DayA[1]
+            colorName3 = DayA[2]
+            colorName4 = DayA[3]
+            colorName5 = DayA[4]
         } else if day == "dayB" {
-            colorName1 = dayB[0]
-            colorName2 = dayB[1]
-            colorName3 = dayB[2]
-            colorName4 = dayB[3]
-            colorName5 = dayB[4]
+            colorName1 = DayB[0]
+            colorName2 = DayB[1]
+            colorName3 = DayB[2]
+            colorName4 = DayB[3]
+            colorName5 = DayB[4]
         } else if day == "dayC" {
-            colorName1 = dayC[0]
-            colorName2 = dayC[1]
-            colorName3 = dayC[2]
-            colorName4 = dayC[3]
-            colorName5 = dayC[4]
+            colorName1 = DayC[0]
+            colorName2 = DayC[1]
+            colorName3 = DayC[2]
+            colorName4 = DayC[3]
+            colorName5 = DayC[4]
         } else if day == "dayD" {
-            colorName1 = dayD[0]
-            colorName2 = dayD[1]
-            colorName3 = dayD[2]
-            colorName4 = dayD[3]
-            colorName5 = dayD[4]
+            colorName1 = DayD[0]
+            colorName2 = DayD[1]
+            colorName3 = DayD[2]
+            colorName4 = DayD[3]
+            colorName5 = DayD[4]
         } else if day == "dayE" {
-            colorName1 = dayE[0]
-            colorName2 = dayE[1]
-            colorName3 = dayE[2]
-            colorName4 = dayE[3]
-            colorName5 = dayE[4]
+            colorName1 = DayE[0]
+            colorName2 = DayE[1]
+            colorName3 = DayE[2]
+            colorName4 = DayE[3]
+            colorName5 = DayE[4]
         } else if day == "dayF" {
-            colorName1 = dayF[0]
-            colorName2 = dayF[1]
-            colorName3 = dayF[2]
-            colorName4 = dayF[3]
-            colorName5 = dayF[4]
+            colorName1 = DayF[0]
+            colorName2 = DayF[1]
+            colorName3 = DayF[2]
+            colorName4 = DayF[3]
+            colorName5 = DayF[4]
         } else if day == "dayG" {
-            colorName1 = dayG[0]
-            colorName2 = dayG[1]
-            colorName3 = dayG[2]
-            colorName4 = dayG[3]
-            colorName5 = dayG[4]
+            colorName1 = DayG[0]
+            colorName2 = DayG[1]
+            colorName3 = DayG[2]
+            colorName4 = DayG[3]
+            colorName5 = DayG[4]
         } else if day == "dayH" {
-            colorName1 = dayH[0]
-            colorName2 = dayH[1]
-            colorName3 = dayH[2]
-            colorName4 = dayH[3]
-            colorName5 = dayH[4]
+            colorName1 = DayH[0]
+            colorName2 = DayH[1]
+            colorName3 = DayH[2]
+            colorName4 = DayH[3]
+            colorName5 = DayH[4]
         }
 
         
@@ -284,151 +325,10 @@ struct ContentView: View {
                 return Color(UIColor.brown) // Assuming you want to use brown for tan
             // Add more cases as needed
             default:
-                return Color.white // Default color if no match is found
+                return Color.black // Default color if no match is found
         }
     }
 
-}
-
-struct editColors: View {
-    @Binding var editColorsScene: Bool
-    @State private var redWord: String = ""
-    @State private var blueWord: String = ""
-    @State private var greenWord: String = ""
-    @State private var orangeWord: String = ""
-    @State private var purpleWord: String = ""
-    @State private var pinkWord: String = ""
-    @State private var yellowWord: String = ""
-    @State private var tanWord: String = ""
-    
-    @State private var filloutPopup = false
-    @State var red: String = ""
-    @State var blue: String = ""
-    @State var green: String = ""
-    @State var orange: String = ""
-    @State var yellow: String = ""
-    @State var purple: String = ""
-    @State var pink: String = ""
-    @State var tan: String = ""
-    
-    var body: some View {
-        VStack {
-            Text("Enter a Red Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Red Period", text: $redWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Blue Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Blue Period", text: $blueWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Green Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Green Period", text: $greenWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Orange Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Orange Period", text: $orangeWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Yellow Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Yellow Period", text: $yellowWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Purple Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Purple Period", text: $purpleWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Pink Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Pink Period", text: $pinkWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Text("Enter a Tan Period")
-                .padding()
-                .foregroundColor(.white)
-            TextField("Enter a Tan Period", text: $tanWord)
-                .padding()
-                .border(Color.white, width: 1)
-                .foregroundColor(.white)
-            
-            Button("Save Info") {
-                if redWord.isEmpty || blueWord.isEmpty || greenWord.isEmpty || orangeWord.isEmpty || yellowWord.isEmpty || purpleWord.isEmpty || pinkWord.isEmpty || tanWord.isEmpty {
-                    filloutPopup = true
-                } else {
-                    red = redWord
-                    blue = blueWord
-                    green = greenWord
-                    orange = orangeWord
-                    yellow = yellowWord
-                    purple = purpleWord
-                    pink = pinkWord
-                    tan = tanWord
-                    editColorsScene.toggle()
-                }
-            }
-            .padding()
-            .border(Color.white, width: 1)
-            .foregroundColor(.white)
-            
-            Button("Go Back") {
-                editColorsScene.toggle()
-            }
-            .padding()
-            .background(Color.red)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-        }
-        if filloutPopup {
-            Color.black.opacity(0.4)
-                .edgesIgnoringSafeArea(.all)
-                .onTapGesture {
-                    // Close popup when background is tapped
-                    filloutPopup = false
-                }
-
-            VStack(spacing: 20) {
-                Text("You did not fill out all of the requirements")
-
-                Button("Close") {
-                    filloutPopup = false
-                }
-                .padding()
-                .background(Color.black)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            .frame(width: 300, height: 200)
-            .background(Color.red)
-            .cornerRadius(20)
-            .shadow(radius: 20)
-        }
-    }
 }
 
 struct ContentView_Previews: PreviewProvider {
