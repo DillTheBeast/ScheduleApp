@@ -158,7 +158,6 @@ struct ContentView: View {
             VStack {
                 if editColorsScene {
                     //editColors(editColorsScene: $editColorsScene, red: savedRed, blue: savedBlue, green: savedGreen, orange: savedOrange, yellow: savedYellow, purple: savedPurple, pink: savedPink, tan: savedTan, dayA: dayA)
-                    Text("Test")
                 } else {
                     Text(displayDate)
                         .foregroundColor(.white)
@@ -173,7 +172,6 @@ struct ContentView: View {
                         if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
                             SelectedDate = newDate
                             Schedule()
-                            display()
                         }
                     }
                     .padding()
@@ -185,7 +183,6 @@ struct ContentView: View {
                         if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
                             SelectedDate = newDate
                             Schedule()
-                            display()
                         }
                     }
                      
@@ -213,7 +210,7 @@ struct ContentView: View {
         }
     }
     func display() -> some View {
-        List(0..<DayA.count, id: \.self) { index in
+        List(0..<currentDaySchedule.count, id: \.self) { index in
             HStack {
                 Spacer() // This spacer will push the content to the center
                 Text(currentDaySchedule[index])
@@ -222,9 +219,9 @@ struct ContentView: View {
                     .padding(.vertical, 30) // Add vertical padding to fill the space
                 Spacer() // This spacer will keep the content in the center
             }
-            .background(self.colorFromName(name: DayA[index]))
+            .background(self.colorFromName(name: currentDaySchedule[index]))
             .listRowInsets(EdgeInsets()) // Removes default padding from list row
-            .listRowBackground(self.colorFromName(name: DayA[index])) // Color the entire row
+            .listRowBackground(self.colorFromName(name: currentDaySchedule[index])) // Color the entire row
         }
         .listStyle(.plain)
     }
