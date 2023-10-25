@@ -156,65 +156,53 @@ struct ContentView: View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             VStack {
-                if editColorsScene {
-                    //editColors(editColorsScene: $editColorsScene, red: savedRed, blue: savedBlue, green: savedGreen, orange: savedOrange, yellow: savedYellow, purple: savedPurple, pink: savedPink, tan: savedTan, dayA: dayA)
-                } else {
-                    Text(displayDate)
-                        .foregroundColor(.white)
-                        .font(.system(size: 30))
-                    Text("\(day)")
-                        .font(.system(size: 30))
-                        .foregroundColor(.white)
-                    // Create a box with the text and background color
-                    display()
+                Text(displayDate)
+                    .foregroundColor(.white)
+                    .font(.system(size: 30))
+                Text("\(day)")
+                    .font(.system(size: 30))
+                    .foregroundColor(.white)
+                // Create a box with the text and background color
+                display()
 
-                    Button("Go to Next Day") {
-                        if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
-                            SelectedDate = newDate
-                            Schedule()
-                        }
+                Button("Go to Next Day") {
+                    if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: SelectedDate) {
+                        SelectedDate = newDate
+                        Schedule()
                     }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    
-                    Button("Go to Previous Day") {
-                        if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
-                            SelectedDate = newDate
-                            Schedule()
-                        }
-                    }
-                     
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    Button("Edit Colors") {
-                        editColorsScene = true
-                        print("Test")
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-            }
-            .padding()
-            .onAppear {
-                fetchData()
-            }
-            .onChange(of: csvData) { _ in
-                Schedule()
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+                
+                Button("Go to Previous Day") {
+                    if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: SelectedDate) {
+                        SelectedDate = newDate
+                        Schedule()
+                    }
+                }
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
         }
+        .padding()
+        .onAppear {
+            fetchData()
+        }
+        .onChange(of: csvData) { _ in
+            Schedule()
+        }
+        .background(Color.black)
     }
     func display() -> some View {
         List(0..<currentDaySchedule.count, id: \.self) { index in
             HStack {
                 Spacer() // This spacer will push the content to the center
                 Text(currentDaySchedule[index])
-                    .font(.system(size: 26))
+                    .font(.system(size: 35))
                     .foregroundColor(Color.white)
                     .padding(.vertical, 30) // Add vertical padding to fill the space
                 Spacer() // This spacer will keep the content in the center
