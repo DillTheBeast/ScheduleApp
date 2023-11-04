@@ -229,14 +229,19 @@ struct ContentView: View {
         
     }
     func Schedule() {
+        var foundMatch = false
         for (index, row) in csvData.enumerated() {
-            print(formattedDate)
             if let firstColumnValue = row.first, firstColumnValue == formattedDate {
-                print("Match found in row!")
+                foundMatch = true
                 found = index + 1
                 day = csvData[found - 1][1]
                 break
             }
+        }
+
+        if !foundMatch {
+            // Handle the case where no schedule data is available for the selected date
+            day = "No Schedule Available"
         }
         if day == "dayA" {
             colorName1 = DayA[0]
